@@ -1,16 +1,20 @@
-package sanmithra.com.TodoList.Controllers;
+package hekshot.com.TodoList.Controllers;
 
+import hekshot.com.TodoList.Entity.Login;
+import hekshot.com.TodoList.Entity.TodoList;
+import hekshot.com.TodoList.Entity.Users;
+import hekshot.com.TodoList.Repository.TodoListRepository;
+import hekshot.com.TodoList.Services.CaptchaValidationException;
+import hekshot.com.TodoList.Services.CaptchaValidator;
+import hekshot.com.TodoList.Services.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import sanmithra.com.TodoList.Entity.Login;
-import sanmithra.com.TodoList.Entity.TodoList;
-import sanmithra.com.TodoList.Entity.Users;
-import sanmithra.com.TodoList.Repository.TodoListRepository;
-import sanmithra.com.TodoList.Repository.UsersRepository;
-import sanmithra.com.TodoList.Services.*;
+import hekshot.com.TodoList.Repository.UsersRepository;
+import hekshot.com.TodoList.Services.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -19,8 +23,13 @@ import java.util.Optional;
 @CrossOrigin("http://localhost:3000")
 @RequestMapping("/users")
 public class UserController {
-@Autowired
+
+    @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
     private TodoListRepository todoListRepository;
 
@@ -32,25 +41,30 @@ public class UserController {
         return usersRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
     }
 
-    @PostMapping("/adduser")
-    public Users addUser(@RequestBody Users users,@RequestParam("g-recaptcha-response")String captcha) throws UsernameAlreadyExistsException {
+    @PostMapping("/register")
+    public Users addUser(@RequestBody Users users /*@RequestParam("g-recaptcha-response")String captcha*/) throws UsernameAlreadyExistsException {
         Users existingUser = usersRepository.findByUserName(users.getUserName());
         if (existingUser != null) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
-        else if(validator.isValid(captcha)) {
+//        else if(validator.isValid(captcha)) {
+//            users.setUserName(users.getUserName());
+//            users.setUserPassword(users.getUserPassword());
+//            return usersRepository.save(users);
+//        }
+//        else {
+//            throw new CaptchaValidationException("CAPTCHA validation failed");
+//        }
+        else{
             users.setUserName(users.getUserName());
-            users.setUserPassword(users.getUserPassword());
+            users.setUserPassword(passwordEncoder.encode(users.getUserPassword()));
             return usersRepository.save(users);
         }
-        else {
-            throw new CaptchaValidationException("CAPTCHA validation failed");
-        }
     }
-    @PostMapping("/login")
-    public Users loginUser(@RequestBody Login login,@RequestParam("g-recaptcha-response")String captcha) {
+    /*@PostMapping("/login")
+    public Users loginUser(@RequestBody Login login *//*@RequestParam("g-recaptcha-response")*//**//*String captcha*//*) {
         Users user = usersRepository.findByUserName(login.getUserName());
-        if (validator.isValid(captcha)) {
+        *//*if (validator.isValid(captcha)) {*//*
             if (user != null && user.getUserPassword().equals(login.getUserPassword())) {
                 // Successful login
                 //return ResponseEntity.ok("Login successful");
@@ -60,10 +74,26 @@ public class UserController {
                 throw new RuntimeException();
             }
         }
-        else {
+        *//*else {
             throw new CaptchaValidationException("CAPTCHA validation failed");
+        }*//*
+    *//*}*/
+
+
+    @PostMapping("/login")
+    public Users loginUser(@RequestBody Login login) {
+        Users user = usersRepository.findByUserName(login.getUserName());
+
+        if (user != null && passwordEncoder.matches(login.getUserPassword(), user.getUserPassword())) {
+            // Passwords match, successful login
+            return user;
+        } else {
+            // Return an informative response to the client
+            throw new RuntimeException();
         }
     }
+
+
 
 
     @PostMapping("/{userId}/todos")
@@ -84,11 +114,12 @@ public class UserController {
 
 
     @DeleteMapping("{userId}/todos/{todoId}")
-    public void deleteTodo(@PathVariable Integer userId, @PathVariable Integer todoId) {
+    public Users deleteTodo(@PathVariable Integer userId, @PathVariable Integer todoId) {
         Users user = usersRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
         TodoList todo = todoListRepository.findById(todoId).orElseThrow(() -> new NoSuchElementException());
         user.getTodoList().remove(todo);
         todoListRepository.delete(todo);
+        return usersRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
     }
     @PutMapping("/{userId}/todos/{todoId}")
     public TodoList editTodo(
@@ -109,11 +140,9 @@ public class UserController {
         return todo;
     }
 
-
-
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Integer userId){
-        Users users = usersRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
+        Users users = usersRepository.findById(userId).orElseThrow(NoSuchElementException::new);
         usersRepository.delete(users);
     }
     @PutMapping("/users/{userId}/todos/{taskId}")
@@ -135,17 +164,5 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 }
 
-//    @PostMapping("/login")
-//    public String loginUser(@RequestBody Login login) {
-//        Users temp = usersRepository.findByUserName(login.getUserName());
-//        Users temp2 = usersRepository.findByUserPassword(login.getUserPassword());
-//        if (temp.getUserPassword() == temp2.getUserPassword()) {
-//            return "success";
-//        } else {
-//            return "failed";
-//        }
-//    }
