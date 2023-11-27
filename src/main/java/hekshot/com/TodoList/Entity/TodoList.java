@@ -1,13 +1,17 @@
-package sanmithra.com.TodoList.Entity;
+package hekshot.com.TodoList.Entity;
+
+import lombok.Getter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 @Entity
 public class TodoList {
+    @Getter
     @Id
     @GeneratedValue
     private int Id;
+    @Getter
     private String tasks;
     private boolean completed=Boolean.FALSE;
 
@@ -21,16 +25,8 @@ public class TodoList {
 
     }
 
-    public int getId() {
-        return Id;
-    }
-
     public void setId(int id) {
         Id = id;
-    }
-
-    public String getTasks() {
-        return tasks;
     }
 
     public void setTasks(String tasks) {

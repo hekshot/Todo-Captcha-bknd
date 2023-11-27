@@ -1,7 +1,9 @@
-package sanmithra.com.TodoList.Services;
+package hekshot.com.TodoList.Services;
 
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
+@Getter
 @Service
 public class TodoListService {
     private String tasks;
@@ -12,10 +14,6 @@ public class TodoListService {
 
     public TodoListService(String tasks) {
         this.tasks = tasks;
-    }
-
-    public String getTasks() {
-        return tasks;
     }
 
     public void setTasks(String content) {

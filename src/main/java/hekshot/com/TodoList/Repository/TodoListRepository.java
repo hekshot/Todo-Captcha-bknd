@@ -1,7 +1,7 @@
-package sanmithra.com.TodoList.Repository;
+package hekshot.com.TodoList.Repository;
 
+import hekshot.com.TodoList.Entity.TodoList;
 import org.springframework.data.jpa.repository.JpaRepository;
-import sanmithra.com.TodoList.Entity.TodoList;
 
 public interface TodoListRepository extends JpaRepository<TodoList,Integer> {
 }

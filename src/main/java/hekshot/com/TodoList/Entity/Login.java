@@ -1,19 +1,25 @@
-package sanmithra.com.TodoList.Entity;
+package hekshot.com.TodoList.Entity;
 
+import lombok.Getter;
+
+import javax.persistence.Transient;
+
+@Getter
 public class Login {
     private String userName;
     private String userPassword;
 
-    public String getUserName() {
-        return userName;
-    }
+    @Transient
+    private String captcha;
+
+    @Transient
+    private String hiddenCaptcha;
+
+    @Transient
+    private String realCaptcha;
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getUserPassword() {
-        return userPassword;
     }
 
     public void setUserPassword(String userPassword) {

@@ -1,4 +1,4 @@
-package sanmithra.com.TodoList.Services;
+package hekshot.com.TodoList.Services;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

@@ -1,9 +1,9 @@
-package sanmithra.com.TodoList;
+package hekshot.com.TodoList;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import sanmithra.com.TodoList.Controllers.UserController;
+import hekshot.com.TodoList.Controllers.UserController;
 
 @SpringBootTest
 class TodoListApplicationTests {
